@@ -11,218 +11,479 @@
         /* Ensure Inter font is loaded if not available by default */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
 
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll on body */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Style for the content display area (dark theme) */
-        #htmlOutput {
-            border: 1px solid #4b5563; /* gray-600 */
-            padding: 1rem; /* p-4 */
-            margin-top: 1rem; /* mt-4 */
-            background-color: #1f2937; /* gray-800 */
-            color: #d1d5db; /* gray-300 */
-            border-radius: 0.375rem; /* rounded-md */
-            min-height: 150px;
-            white-space: pre-wrap; /* To wrap long lines and preserve spaces */
-            word-break: break-all; /* To break long words */
-            font-family: 'JetBrains Mono', monospace; /* Monospaced font for code-like output */
-            font-size: 0.875rem; /* text-sm */
+        /* Light mode styles */
+        body.light-mode {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            color: #1f2937; /* text-gray-800 */
         }
-
-        /* Custom button styling for dark theme */
-        .custom-button {
+        body.light-mode .editor-main-container,
+        body.light-mode .output-container {
+            background-color: #ffffff; /* bg-white */
+            /* Adjusted shadow for a slightly less intense look on full width */
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+        }
+        body.light-mode .editor-main-container h1,
+        body.light-mode .output-container h3 {
+            color: #111827; /* text-gray-900 */
+        }
+         body.light-mode #htmlOutput {
+            background-color: #f9fafb; /* bg-gray-50 */
+            color: #1f2937; /* text-gray-800 */
+            border-color: #d1d5db; /* border-gray-300 */
+        }
+        body.light-mode .control-button {
             background-color: #4f46e5; /* bg-indigo-600 */
             color: white;
-            font-weight: bold;
-            padding: 0.75rem 1.5rem; /* py-3 px-6 */
-            border-radius: 0.375rem; /* rounded-md */
-            transition: background-color 0.3s ease;
         }
-        .custom-button:hover {
+        body.light-mode .control-button:hover {
             background-color: #4338ca; /* hover:bg-indigo-700 */
         }
+        body.light-mode .preview-pane {
+            border-color: #d1d5db; /* border-gray-300 */
+            background-color: #ffffff;
+        }
 
-        /* Style for the message box (dark theme) */
+
+        /* Dark mode styles (default) */
+        body.dark-mode {
+            background-color: #111827; /* bg-gray-900 */
+            color: #d1d5db; /* text-gray-300 */
+        }
+        body.dark-mode .editor-main-container,
+        body.dark-mode .output-container {
+            background-color: #1f2937; /* bg-gray-800 */
+            /* Adjusted shadow for dark mode */
+            box-shadow: 0 5px 10px -2px rgba(0,0,0,0.25), 0 2px 4px -1px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .editor-main-container h1,
+        body.dark-mode .output-container h3 {
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        body.dark-mode #htmlOutput {
+            background-color: #374151; /* bg-gray-700 */
+            color: #d1d5db; /* text-gray-300 */
+            border-color: #4b5563; /* border-gray-600 */
+        }
+        body.dark-mode .control-button {
+            background-color: #6366f1; /* bg-indigo-500 */
+            color: white;
+        }
+        body.dark-mode .control-button:hover {
+            background-color: #4f46e5; /* hover:bg-indigo-600 */
+        }
+        body.dark-mode .preview-pane {
+            border-color: #4b5563; /* border-gray-600 */
+            background-color: #1f2937;
+        }
+
+
+        #htmlOutput {
+            border: 1px solid;
+            padding: 0.5rem 1rem; /* Adjusted padding */
+            margin-top: 1rem;
+            border-radius: 0.375rem;
+            min-height: 100px; /* Reduced min-height for smaller screens */
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        .control-button {
+            font-weight: 600; /* semibold */
+            padding: 0.5rem 1rem; /* py-2 px-4 */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            margin-right: 0.5rem; /* mr-2 */
+            margin-bottom: 0.5rem; /* mb-2 for wrapping */
+        }
+        .control-button:last-child {
+            margin-right: 0;
+        }
+
+
         .message-box {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #059669; /* bg-emerald-600 */
             color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.75rem 1.25rem; /* Adjusted padding */
+            border-radius: 0.375rem;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 1000;
-            display: none; /* Hidden by default */
-            font-size: 0.875rem; /* text-sm */
+            z-index: 1050; /* Ensure it's above TinyMCE UI */
+            display: none;
+            font-size: 0.875rem;
+        }
+        .message-box.success {
+            background-color: #059669; /* emerald-600 */
         }
         .message-box.error {
-            background-color: #dc2626; /* bg-red-600 */
+            background-color: #dc2626; /* red-600 */
         }
 
-        /* Ensure the editor container uses the full width on smaller screens */
-        .editor-container {
-            width: 100%;
-            max-width: 1000px; /* Max width for larger screens */
-            margin-left: auto;
-            margin-right: auto;
+        .editor-layout {
+            display: flex;
+            flex-direction: column; /* Stack by default for mobile */
+            gap: 1rem; /* gap-4 */
+            margin-top: 1.5rem; /* mt-6 */
+        }
+        /* Apply row layout for medium screens and up */
+        @media (min-width: 768px) { /* md breakpoint */
+            .editor-layout {
+                flex-direction: row;
+            }
         }
 
-        /* Tailwind dark mode utility class */
-        /* You can add this to the html tag if you want to control dark mode via JS: <html class="dark"> */
+        .editor-column {
+            flex: 1;
+            min-width: 0; /* Important for flex items to shrink properly */
+        }
+        .preview-pane {
+            flex: 1;
+            border: 1px solid;
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.5rem; /* p-2, reduced for smaller screens */
+            overflow-y: auto;
+            height: 400px; /* Default height for mobile */
+            min-height: 300px; /* Minimum height */
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .preview-pane {
+                height: 600px; /* Taller height for larger screens */
+                padding: 1rem; /* p-4 */
+            }
+        }
+
+        /* Basic scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #374151; /* gray-700 for dark, adjust for light */
+        }
+        body.light-mode ::-webkit-scrollbar-track {
+            background: #e5e7eb; /* gray-200 for light */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6b7280; /* gray-500 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563; /* gray-600 */
+        }
+        /* Firefox scrollbar styling */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #6b7280 #374151; /* thumb track */
+        }
+        body.light-mode * {
+             scrollbar-color: #9ca3af #e5e7eb; /* thumb track for light */
+        }
+
+        /* Ensure TinyMCE dialogs are above other elements */
+        .tox-dialog-wrap {
+            z-index: 1040 !important; /* Higher than message box if needed, but generally fine */
+        }
+
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 p-4 md:p-8">
+<body class="dark-mode p-2 sm:p-4 md:p-6">
 
-    <div class="editor-container bg-gray-800 p-6 rounded-lg shadow-2xl">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-100 mb-6 text-center">HTML Editor</h1>
+    <div class="editor-main-container w-full p-2 sm:p-4 md:p-6 rounded-lg">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 text-center">HTML Editor</h1>
 
-        <textarea id="myeditor"></textarea>
-
-        <div class="mt-6 text-center">
-            <button id="getContentButton" class="custom-button">
-                Get HTML Content
-            </button>
+        <div class="mb-4 flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <button id="saveButton" class="control-button">Save HTML</button>
+            <label for="openFile" class="control-button cursor-pointer">Open HTML</label>
+            <input type="file" id="openFile" accept=".html,.htm" class="hidden">
+            <button id="themeToggleButton" class="control-button">Toggle Theme</button>
+            <span id="autoSaveStatus" class="text-xs sm:text-sm ml-0 sm:ml-auto mt-2 sm:mt-0 opacity-75"></span>
         </div>
 
-        <div class="mt-6">
-            <h3 class="text-xl font-semibold text-gray-300 mb-2">Generated HTML:</h3>
+        <div class="editor-layout">
+            <div class="editor-column">
+                <textarea id="myeditor"></textarea>
+            </div>
+            <div class="preview-pane" id="previewPane">
+                </div>
+        </div>
+    </div>
+
+    <div class="output-container w-full p-2 sm:p-4 md:p-6 mt-4 sm:mt-8 rounded-lg">
+        <div class="text-center">
+            <button id="getContentButton" class="control-button">Copy Editor HTML</button>
+        </div>
+
+        <div class="mt-4 sm:mt-6">
+            <h3 class="text-lg sm:text-xl font-semibold mb-2">Generated HTML (for copy):</h3>
             <pre id="htmlOutput"></pre>
         </div>
     </div>
 
     <div id="messageBox" class="message-box">
-        HTML Content Copied to Clipboard!
-    </div>
+        </div>
 
     <script>
-        // Initialize TinyMCE with a dark theme
-        tinymce.init({
-            selector: '#myeditor',
-            skin: 'oxide-dark', // Use the dark skin for the editor UI
-            content_css: 'dark', // Use dark mode for the content area as well
-            plugins: 'advlist autolink lists link image charmap print preview anchor ' +
-                     'searchreplace visualblocks code codesample fullscreen ' + // Added codesample
-                     'insertdatetime media table paste help wordcount emoticons',
-            toolbar: 'undo redo | styles | bold italic underline | ' + // Changed formatselect to styles for more control
-                     'alignleft aligncenter alignright alignjustify | ' +
-                     'bullist numlist outdent indent | link image media codesample | ' +
-                     'forecolor backcolor emoticons | removeformat | code | fullscreen | help',
-            height: 600, // Increased height for better usability
-            menubar: 'file edit view insert format tools table help', // Keep menubar for full functionality
-            // Styling for the content within the editor to match a code editor aesthetic
-            content_style: `
-                body {
-                    font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Courier New", monospace;
-                    font-size: 14px;
-                    line-height: 1.6;
-                    background-color: #1f2937; /* bg-gray-800 */
-                    color: #d1d5db; /* text-gray-300 */
-                }
-                h1, h2, h3, h4, h5, h6 { color: #f3f4f6; /* text-gray-100 */ }
-                p { color: #e5e7eb; /* text-gray-200 */ }
-                a { color: #60a5fa; /* text-blue-400 */ }
-                pre, code {
-                    font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Courier New", monospace;
-                    background-color: #111827; /* bg-gray-900 for code blocks */
-                    color: #9ca3af; /* text-gray-400 for code text */
-                    padding: 0.2em 0.4em;
-                    border-radius: 3px;
-                }
-                pre {
-                    padding: 1em;
-                    overflow-x: auto;
-                }
-                .mce-content-body code[class*="language-"],
-                .mce-content-body pre[class*="language-"] {
-                    color: #d1d5db; /* text-gray-300 for prism */
-                    background: none;
-                    text-shadow: 0 1px rgba(0, 0, 0, 0.3);
-                    font-family: 'JetBrains Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-                    font-size: 1em;
-                    text-align: left;
-                    white-space: pre;
-                    word-spacing: normal;
-                    word-break: normal;
-                    word-wrap: normal;
-                    line-height: 1.5;
-                    -moz-tab-size: 4;
-                    -o-tab-size: 4;
-                    tab-size: 4;
-                    -webkit-hyphens: none;
-                    -moz-hyphens: none;
-                    -ms-hyphens: none;
-                    hyphens: none;
-                }
-            `,
-            codesample_languages: [ // Configure languages for the codesample plugin
-                { text: 'HTML/XML', value: 'markup' },
-                { text: 'JavaScript', value: 'javascript' },
-                { text: 'CSS', value: 'css' },
-                { text: 'PHP', value: 'php' },
-                { text: 'Ruby', value: 'ruby' },
-                { text: 'Python', value: 'python' },
-                { text: 'Java', value: 'java' },
-                { text: 'C', value: 'c' },
-                { text: 'C#', value: 'csharp' },
-                { text: 'C++', value: 'cpp' }
-            ],
-            // For self-hosted image uploads (requires server-side script)
-            // images_upload_url: 'upload_handler.php',
-            // automatic_uploads: true,
-            // file_picker_types: 'image',
-            // file_picker_callback: function (cb, value, meta) { /* ... your callback ... */ }
-        });
+        const editorContentKey = 'tinymce_editor_content';
+        const themeKey = 'tinymce_editor_theme';
+        let autoSaveTimeout;
 
-        // Get content from the editor
+        // Function to apply theme to the main page and editor body
+        function applyTheme(theme) {
+            const bodyEl = document.body;
+            if (theme === 'light') {
+                bodyEl.classList.remove('dark-mode');
+                bodyEl.classList.add('light-mode');
+            } else {
+                bodyEl.classList.remove('light-mode');
+                bodyEl.classList.add('dark-mode');
+            }
+            // Update TinyMCE content theme if editor instance exists
+            const editor = tinymce.get('myeditor');
+            if (editor && editor.initialized) { // Check if editor is initialized
+                const editorBody = editor.getBody();
+                if (editorBody) {
+                    editorBody.classList.toggle('dark-mode-content', theme === 'dark');
+                    editorBody.classList.toggle('light-mode-content', theme === 'light');
+                }
+            }
+            // Update Favicon based on theme
+            const faviconLink = document.querySelector("link[rel~='icon']");
+            if (faviconLink) {
+                const newFill = theme === 'dark' ? '%231f2937' : '%23E5E7EB'; // Dark or light gray background
+                const newTextColor = theme === 'dark' ? '%2360a5fa' : '%233B82F6'; // Blue shades
+                faviconLink.href = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='${newFill}'/%3E%3Ctext x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='22' font-weight='bold' fill='${newTextColor}'%3E%26lt;%26%23x2F;%26gt;%3C/text%3E%3C/svg%3E`;
+            }
+        }
+
+
+        // Load initial theme
+        const savedTheme = localStorage.getItem(themeKey) || 'dark'; // Default to dark
+        applyTheme(savedTheme);
+
+
+        // Initialize TinyMCE
+        function initTinyMCE(theme) {
+            tinymce.init({
+                selector: '#myeditor',
+                skin: (theme === 'light') ? 'oxide' : 'oxide-dark',
+                content_css: (theme === 'light') ? 'default' : 'dark', // This applies basic light/dark to content
+                plugins: 'advlist autolink lists link image charmap print preview anchor ' +
+                         'searchreplace visualblocks code codesample fullscreen ' +
+                         'insertdatetime media table paste help wordcount emoticons',
+                toolbar: 'undo redo | styles | bold italic underline | ' +
+                         'alignleft aligncenter alignright alignjustify | ' +
+                         'bullist numlist outdent indent | link image media codesample | ' +
+                         'forecolor backcolor emoticons | removeformat | code | fullscreen | help',
+                height: 600, // This will be the height for md screens and up. Mobile height is handled by preview-pane CSS.
+                menubar: 'file edit view insert format tools table help',
+                promotion: false, // Disable TinyMCE promotion
+                content_style: `
+                    body {
+                        font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Courier New", monospace;
+                        font-size: 14px;
+                        line-height: 1.6;
+                        transition: background-color 0.3s, color 0.3s;
+                        padding: 8px; /* Add some padding inside editor content area */
+                    }
+                    /* Content specific theme classes, applied by applyTheme function */
+                    body.light-mode-content { background-color: #ffffff; color: #1f2937; }
+                    body.dark-mode-content { background-color: #1f2937; color: #d1d5db; }
+
+                    body.light-mode-content h1, body.light-mode-content h2, body.light-mode-content h3, body.light-mode-content h4, body.light-mode-content h5, body.light-mode-content h6 { color: #111827; }
+                    body.light-mode-content p { color: #374151; }
+                    body.light-mode-content a { color: #2563eb; }
+                    body.light-mode-content pre, body.light-mode-content code { background-color: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; }
+
+                    body.dark-mode-content h1, body.dark-mode-content h2, body.dark-mode-content h3, body.dark-mode-content h4, body.dark-mode-content h5, body.dark-mode-content h6 { color: #f3f4f6; }
+                    body.dark-mode-content p { color: #e5e7eb; }
+                    body.dark-mode-content a { color: #60a5fa; }
+                    body.dark-mode-content pre, body.dark-mode-content code { background-color: #111827; color: #9ca3af; border: 1px solid #374151; }
+
+                    pre, code {
+                        font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Courier New", monospace;
+                        padding: 0.2em 0.4em;
+                        border-radius: 3px;
+                    }
+                    pre {
+                        padding: 1em;
+                        overflow-x: auto;
+                        display: block; /* Ensure pre takes full width */
+                    }
+                `,
+                codesample_languages: [
+                    { text: 'HTML/XML', value: 'markup' }, { text: 'JavaScript', value: 'javascript' },
+                    { text: 'CSS', value: 'css' }, { text: 'Python', value: 'python' },
+                ],
+                setup: function(editor) {
+                    editor.on('init', function() {
+                        // Apply theme classes to editor body
+                        applyTheme(localStorage.getItem(themeKey) || 'dark');
+
+                        // Load content from localStorage
+                        const savedContent = localStorage.getItem(editorContentKey);
+                        if (savedContent) {
+                            editor.setContent(savedContent);
+                            updatePreview(savedContent);
+                        } else {
+                            updatePreview('');
+                        }
+                    });
+
+                    // Auto-save functionality & Real-time preview
+                    const autoSaveStatusEl = document.getElementById('autoSaveStatus');
+                    editor.on('keyup change input NodeChange', function() { // Added more events for robust update
+                        clearTimeout(autoSaveTimeout);
+                        if (autoSaveStatusEl) autoSaveStatusEl.textContent = 'Saving...';
+                        autoSaveTimeout = setTimeout(function() {
+                            const currentContent = editor.getContent();
+                            localStorage.setItem(editorContentKey, currentContent);
+                            if (autoSaveStatusEl) autoSaveStatusEl.textContent = 'Saved.';
+                            setTimeout(() => { if (autoSaveStatusEl) autoSaveStatusEl.textContent = ''; }, 2000);
+                            updatePreview(currentContent);
+                        }, 300); // Reduced debounce time for more responsive preview
+                    });
+                }
+            });
+        }
+
+        initTinyMCE(savedTheme); // Initial call to init TinyMCE
+
+        const saveButton = document.getElementById('saveButton');
+        const openFileElement = document.getElementById('openFile');
+        const themeToggleButton = document.getElementById('themeToggleButton');
         const getContentButton = document.getElementById('getContentButton');
         const htmlOutput = document.getElementById('htmlOutput');
         const messageBox = document.getElementById('messageBox');
+        const previewPane = document.getElementById('previewPane');
 
-        getContentButton.addEventListener('click', () => {
-            const content = tinymce.get('myeditor').getContent();
-            htmlOutput.textContent = content;
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(content)
-                    .then(() => {
-                        showMessage('HTML Content Copied to Clipboard!');
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy content: ', err);
-                        showMessage('Displayed HTML below. Failed to copy to clipboard.', true);
-                    });
-            } else {
-                try {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = content;
-                    textArea.style.position = "fixed"; // Prevent scrolling to bottom
-                    textArea.style.top = "-9999px";
-                    textArea.style.left = "-9999px";
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    showMessage('HTML Content Copied to Clipboard (fallback method)!');
-                } catch (err) {
-                     console.error('Fallback copy failed: ', err);
-                     showMessage('Displayed HTML below. Clipboard copy not supported/failed.', true);
-                }
-            }
-        });
-
-        // Function to show a temporary message
-        function showMessage(message, isError = false) {
+        // Function to show messages
+        function showMessage(message, type = 'success') {
             messageBox.textContent = message;
-            messageBox.classList.toggle('error', isError);
-            messageBox.style.backgroundColor = isError ? '#dc2626' /* bg-red-600 */ : '#059669' /* bg-emerald-600 */;
+            messageBox.className = 'message-box'; // Reset classes
+            messageBox.classList.add(type); // 'success' or 'error'
             messageBox.style.display = 'block';
             setTimeout(() => {
                 messageBox.style.display = 'none';
             }, 3000);
+        }
+
+        // Save to Local File
+        saveButton.addEventListener('click', () => {
+            const content = tinymce.get('myeditor').getContent();
+            const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '');
+            a.download = `editor_content_${timestamp}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+            showMessage('Content downloaded as HTML file.');
+        });
+
+        // Open Local File
+        openFileElement.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = e.target.result;
+                    tinymce.get('myeditor').setContent(content);
+                    updatePreview(content);
+                    showMessage('File loaded into editor.');
+                };
+                reader.readAsText(file);
+                event.target.value = null; // Reset file input
+            }
+        });
+
+        // Theme Toggle
+        themeToggleButton.addEventListener('click', () => {
+            let currentTheme = localStorage.getItem(themeKey) || 'dark';
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(themeKey, currentTheme);
+            applyTheme(currentTheme); // Apply theme to body and editor content immediately
+
+            // Re-initialize TinyMCE for skin and content_css to take full effect
+            if (tinymce.get('myeditor')) {
+                tinymce.get('myeditor').remove();
+            }
+            initTinyMCE(currentTheme);
+            showMessage(`Switched to ${currentTheme} mode.`);
+        });
+
+
+        // Get content for copy
+        getContentButton.addEventListener('click', () => {
+            const content = tinymce.get('myeditor').getContent();
+            htmlOutput.textContent = content;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(content)
+                    .then(() => showMessage('HTML Content Copied to Clipboard!'))
+                    .catch(err => {
+                        console.error('Failed to copy content: ', err);
+                        showMessage('Displayed HTML below. Failed to copy.', 'error');
+                    });
+            } else {
+                showMessage('Displayed HTML below. Clipboard API not supported.', 'error');
+            }
+        });
+
+        // Real-time Preview Update
+        function updatePreview(content) {
+            if (previewPane) {
+                const iframe = previewPane.querySelector('iframe') || document.createElement('iframe');
+                if (!previewPane.contains(iframe)) { // If iframe is new, append and style
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.style.border = 'none';
+                    previewPane.innerHTML = '';
+                    previewPane.appendChild(iframe);
+                }
+
+                const iframeDoc = iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(content);
+                iframeDoc.close();
+
+                // Apply theme and base styles to iframe content
+                const currentTheme = localStorage.getItem(themeKey) || 'dark';
+                const iframeBody = iframeDoc.body;
+                if (iframeBody) {
+                    if (currentTheme === 'light') {
+                        iframeBody.style.backgroundColor = '#ffffff';
+                        iframeBody.style.color = '#1f2937';
+                    } else {
+                        iframeBody.style.backgroundColor = '#1f2937';
+                        iframeBody.style.color = '#d1d5db';
+                    }
+                    iframeBody.style.fontFamily = "'Inter', sans-serif"; // Consistent font with the page
+                    iframeBody.style.padding = "10px";
+                    iframeBody.style.margin = "0"; // Reset margin
+                    iframeBody.style.boxSizing = "border-box"; // Ensure padding doesn't expand iframe
+                }
+            }
         }
     </script>
 
