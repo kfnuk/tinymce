@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tinymce/tinymce.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231f2937'/%3E%3Ctext x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='22' font-weight='bold' fill='%2360a5fa'%3E%26lt;%26%23x2F;%26gt;%3C/text%3E%3C/svg%3E">
+    <style>
+        /* Ensure Inter font is loaded if not available by default */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Style for the content display area (dark theme) */
+        #htmlOutput {
+            border: 1px solid #4b5563; /* gray-600 */
+            padding: 1rem; /* p-4 */
+            margin-top: 1rem; /* mt-4 */
+            background-color: #1f2937; /* gray-800 */
+            color: #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            min-height: 150px;
+            white-space: pre-wrap; /* To wrap long lines and preserve spaces */
+            word-break: break-all; /* To break long words */
+            font-family: 'JetBrains Mono', monospace; /* Monospaced font for code-like output */
+            font-size: 0.875rem; /* text-sm */
+        }
+
+        /* Custom button styling for dark theme */
+        .custom-button {
+            background-color: #4f46e5; /* bg-indigo-600 */
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 0.3s ease;
+        }
+        .custom-button:hover {
+            background-color: #4338ca; /* hover:bg-indigo-700 */
+        }
+
+        /* Style for the message box (dark theme) */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #059669; /* bg-emerald-600 */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.375rem; /* rounded-md */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .message-box.error {
+            background-color: #dc2626; /* bg-red-600 */
+        }
+
+        /* Ensure the editor container uses the full width on smaller screens */
+        .editor-container {
+            width: 100%;
+            max-width: 1000px; /* Max width for larger screens */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Tailwind dark mode utility class */
+        /* You can add this to the html tag if you want to control dark mode via JS: <html class="dark"> */
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 p-4 md:p-8">
+
+    <div class="editor-container bg-gray-800 p-6 rounded-lg shadow-2xl">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-100 mb-6 text-center">HTML Editor</h1>
+
+        <textarea id="myeditor"></textarea>
+
+        <div class="mt-6 text-center">
+            <button id="getContentButton" class="custom-button">
+                Get HTML Content
+            </button>
+        </div>
+
+        <div class="mt-6">
+            <h3 class="text-xl font-semibold text-gray-300 mb-2">Generated HTML:</h3>
+            <pre id="htmlOutput"></pre>
+        </div>
+    </div>
+
+    <div id="messageBox" class="message-box">
+        HTML Content Copied to Clipboard!
+    </div>
+
+    <script>
+        // Initialize TinyMCE with a dark theme
+        tinymce.init({
+            selector: '#myeditor',
+            skin: 'oxide-dark', // Use the dark skin for the editor UI
+            content_css: 'dark', // Use dark mode for the content area as well
+            plugins: 'advlist autolink lists link image charmap print preview anchor ' +
+                     'searchreplace visualblocks code codesample fullscreen ' + // Added codesample
+                     'insertdatetime media table paste help wordcount emoticons',
+            toolbar: 'undo redo | styles | bold italic underline | ' + // Changed formatselect to styles for more control
+                     'alignleft aligncenter alignright alignjustify | ' +
+                     'bullist numlist outdent indent | link image media codesample | ' +
+                     'forecolor backcolor emoticons | removeformat | code | fullscreen | help',
+            height: 600, // Increased height for better usability
+            menubar: 'file edit view insert format tools table help', // Keep menubar for full functionality
+            // Styling for the content within the editor to match a code editor aesthetic
+            content_style: `
+                body {
+                    font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Courier New", monospace;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    background-color: #1f2937; /* bg-gray-800 */
+                    color: #d1d5db; /* text-gray-300 */
+                }
+                h1, h2, h3, h4, h5, h6 { color: #f3f4f6; /* text-gray-100 */ }
+                p { color: #e5e7eb; /* text-gray-200 */ }
+                a { color: #60a5fa; /* text-blue-400 */ }
+                pre, code {
+                    font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Courier New", monospace;
+                    background-color: #111827; /* bg-gray-900 for code blocks */
+                    color: #9ca3af; /* text-gray-400 for code text */
+                    padding: 0.2em 0.4em;
+                    border-radius: 3px;
+                }
+                pre {
+                    padding: 1em;
+                    overflow-x: auto;
+                }
+                .mce-content-body code[class*="language-"],
+                .mce-content-body pre[class*="language-"] {
+                    color: #d1d5db; /* text-gray-300 for prism */
+                    background: none;
+                    text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+                    font-family: 'JetBrains Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+                    font-size: 1em;
+                    text-align: left;
+                    white-space: pre;
+                    word-spacing: normal;
+                    word-break: normal;
+                    word-wrap: normal;
+                    line-height: 1.5;
+                    -moz-tab-size: 4;
+                    -o-tab-size: 4;
+                    tab-size: 4;
+                    -webkit-hyphens: none;
+                    -moz-hyphens: none;
+                    -ms-hyphens: none;
+                    hyphens: none;
+                }
+            `,
+            codesample_languages: [ // Configure languages for the codesample plugin
+                { text: 'HTML/XML', value: 'markup' },
+                { text: 'JavaScript', value: 'javascript' },
+                { text: 'CSS', value: 'css' },
+                { text: 'PHP', value: 'php' },
+                { text: 'Ruby', value: 'ruby' },
+                { text: 'Python', value: 'python' },
+                { text: 'Java', value: 'java' },
+                { text: 'C', value: 'c' },
+                { text: 'C#', value: 'csharp' },
+                { text: 'C++', value: 'cpp' }
+            ],
+            // For self-hosted image uploads (requires server-side script)
+            // images_upload_url: 'upload_handler.php',
+            // automatic_uploads: true,
+            // file_picker_types: 'image',
+            // file_picker_callback: function (cb, value, meta) { /* ... your callback ... */ }
+        });
+
+        // Get content from the editor
+        const getContentButton = document.getElementById('getContentButton');
+        const htmlOutput = document.getElementById('htmlOutput');
+        const messageBox = document.getElementById('messageBox');
+
+        getContentButton.addEventListener('click', () => {
+            const content = tinymce.get('myeditor').getContent();
+            htmlOutput.textContent = content;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(content)
+                    .then(() => {
+                        showMessage('HTML Content Copied to Clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy content: ', err);
+                        showMessage('Displayed HTML below. Failed to copy to clipboard.', true);
+                    });
+            } else {
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = content;
+                    textArea.style.position = "fixed"; // Prevent scrolling to bottom
+                    textArea.style.top = "-9999px";
+                    textArea.style.left = "-9999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showMessage('HTML Content Copied to Clipboard (fallback method)!');
+                } catch (err) {
+                     console.error('Fallback copy failed: ', err);
+                     showMessage('Displayed HTML below. Clipboard copy not supported/failed.', true);
+                }
+            }
+        });
+
+        // Function to show a temporary message
+        function showMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.classList.toggle('error', isError);
+            messageBox.style.backgroundColor = isError ? '#dc2626' /* bg-red-600 */ : '#059669' /* bg-emerald-600 */;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+
+</body>
+</html>
